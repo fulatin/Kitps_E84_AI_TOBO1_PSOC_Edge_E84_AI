@@ -291,10 +291,106 @@ Run the ModusToolbox Setup program to install the Edge Protect Security suite.
 
 ---
 
-## 6. 本次给出的文件
+## 6. 编辑器补全（clangd / Zed）
+
+目标是让 clangd 能识别三个目标的编译参数并给出补全。**三块板都各自有 cdb，
+因此靠"就近发现"而不是全局 `--compile-commands-dir`。**
+
+### 6.1 cdb 从哪来
+
+| 目标 | cdb 生成方式 |
+|---|---|
+| STM32H7 | 需显式开启：`cmake -S . -B build -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON` |
+| ESP32 | `idf.py build` 的副产物（`build/compile_commands.json`，997 条） |
+| PSE84E | MTB 生成 ninja 文件时的副产物（每个子工程一份，各 900+ 条） |
+
+一键生成：`linux/gen_compile_commands.sh [stm32|esp32|pse84]`
+（STM32H7 那步会自动打上 §2.1 的补丁，否则 CMake 根本配置不了。）
+
+### 6.2 三层配置
+
+**① 仓库根 `.zed/settings.json`** —— 关键在 `--query-driver`：
+
+```json
+"arguments": ["--query-driver=/usr/bin/arm-none-eabi-*,**/xtensa-esp32s3-elf-*", ...]
+```
+
+clangd 本体是 clang，**不知道交叉工具链的内建头文件路径**（`stdint.h`、newlib 等），
+不加这个参数会满屏 "file not found"。它授权 clangd 去执行这些编译器驱动来提取
+系统头文件与 target。可自检：
+
+```bash
+clangd --check=<某个.c> --query-driver=/usr/bin/arm-none-eabi-*   # 看 "got target: ..."
+```
+
+**② 各工程目录 `.clangd`** —— 用 `CompilationDatabase` 指定 cdb 位置：
+
+```yaml
+CompileFlags:
+  CompilationDatabase: build        # 相对本 .clangd 文件
+```
+
+放置位置：`code/STM32H7/`、`code/ESP32_ov2640/`、`Workspace/.../proj_cm33_s|cm33_ns|cm55/`，
+以及 MTB 应用根目录（覆盖 `bsps/` 等共享代码，默认按 CM55 工程分析）。
+clangd 从被编辑文件向上找最近的 `.clangd`，因此每个子树自动用对 cdb。
+
+**③ `.clangd` 里的 `CompileFlags.Add`/`Remove`** —— 处理 clang 与 GCC 的分歧。
+
+### 6.3 clang 与 GCC 的三处分歧（本项目的实际坑）
+
+clangd 用 clang 解析，而固件用 GCC 编译；下面几处宏/开关的取值不同，会让 IDE
+走进**真实固件并不存在**的代码路径。仅影响 IDE 分析，不影响构建。
+
+| # | 现象 | 原因 | 处理 |
+|---|---|---|---|
+| 1 | `'picotls.h' file not found` | `FreeRTOSConfig.h:223` 用 `#if defined(__llvm__)` 在 picolibc/newlib 间二选一；GCC 走 newlib，clang 定义了 `__llvm__` 会误走 picolibc | `-U__llvm__`（MTB 三个子工程） |
+| 2 | `mve_pred16_t` / `int32x4_t` 未知类型 | GCC 用 `-mcpu=cortex-m55` **不**定义 `__ARM_FEATURE_MVE`，clang 会定义；于是 CMSIS 多走 MVE 分支，去 `#include <arm_mve.h>` 并使用 MVE 类型 | `-mcpu=cortex-m55+nomve`（**仅 CM55**，CM33 无 MVE 不要加） |
+| 3 | `-mlongcalls` / `-fstrict-volatile-bitfields` 等 unknown argument | clang 不认识这些 GCC / xtensa-GCC 专有开关，会把整条编译命令判为失败，补全直接失效 | `CompileFlags.Remove`（ESP32） |
+
+### 6.4 实测结果
+
+| 目标 | clangd `--check` |
+|---|---|
+| STM32H7 | ✅ `0 errors` |
+| ESP32-S3 | ✅ `0 errors` |
+| PSE84E proj_cm33_s | ✅ `0 errors` |
+| PSE84E proj_cm33_ns | ✅ `0 errors` |
+| PSE84E proj_cm55 | ⚠️ 1 处第三方头噪音（CMSIS-NN 的 `int32x4_t`） |
+
+**CM55 那处残留的说明**：根因是 `--query-driver` 注入的 GCC 头目录
+（`/usr/lib/gcc/arm-none-eabi/15.3.1/include`）排在 clang 内建头之前，
+于是 `cmsis_clang.h` 里的 `#include <arm_acle.h>` 拿到 **GCC 版** `arm_acle.h`
+（clang 解析不了）。它属于 `#pragma clang system_header` 范围，clangd 会静默它，
+但由此导致的类型缺失会以 `int32x4_t` 之类的形式冒出来。影响仅限于
+**展开 CMSIS-NN/DSP 的 CM55 文件**，工程自身代码的补全与跳转正常；
+`proj_cm33_s`/`proj_cm33_ns` 完全干净。若要彻底消除，可给 CM55 单独指定
+`-nostdinc` 并按顺序手工给出头文件目录。
+
+### 6.5 自检与排错
+
+```bash
+# 1) 单个文件体检
+clangd --check=<file.c> --query-driver=/usr/bin/arm-none-eabi-*
+#    正常结尾：All checks completed, 0 errors
+#    关注日志行：Loaded compilation database from ... / got target: ...
+
+# 2) cdb 是否有效
+jq 'length' <工程>/build/compile_commands.json
+jq -r '.[0].command' <工程>/build/compile_commands.json | cut -c1-160
+```
+
+Zed 侧：`zed: open log` 可看 clangd 的 stderr；改动 `.clangd`/`.zed/settings.json`
+后在命令面板执行 `editor: restart language server` 即可生效，无需重启 Zed。
+
+---
+
+## 7. 本次给出的文件
 
 | 文件 | 说明 |
 |---|---|
 | `linux/build_linux.sh` | 三目标 Linux 构建脚本（STM32H7 默认不动仓库；ESP32 检查组件；PSE84E 走 MTB） |
+| `linux/gen_compile_commands.sh` | 为三套工具链生成 `compile_commands.json` |
 | `linux/stm32h7-linux.patch` | STM32H7 的 4 处最小改动 |
 | `linux/LINUX_BUILD.md` | 本文档 |
+| `.zed/settings.json`（仓库根） | clangd 的 `--query-driver` 等参数 |
+| `code/STM32H7/.clangd`、`code/ESP32_ov2640/.clangd`、`Workspace/.../{,proj_cm33_s,proj_cm33_ns,proj_cm55}/.clangd` | 各工程指向自己的 cdb，并修正 clang/GCC 分歧 |

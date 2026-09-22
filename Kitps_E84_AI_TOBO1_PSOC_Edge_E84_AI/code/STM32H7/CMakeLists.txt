@@ -4,11 +4,11 @@ set(CMAKE_SYSTEM_PROCESSOR          arm)
 set(CMAKE_CROSSCOMPILING            TRUE)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE   STATIC_LIBRARY)
 
-set(ARM_GCC_PATH "C:/Users/37966/Desktop/Kitps_E84_AI_TOBO1_PSOC_Edge_E84_AI/Kitps_E84_AI_TOBO1_PSOC_Edge_E84_AI/arm-gnu-toolchain-12.3.rel1-mingw-w64-i686-arm-none-eabi/bin")
-set(CMAKE_C_COMPILER                "${ARM_GCC_PATH}/arm-none-eabi-gcc.exe")
-set(CMAKE_ASM_COMPILER              "${ARM_GCC_PATH}/arm-none-eabi-gcc.exe")
-set(CMAKE_OBJCOPY                   "${ARM_GCC_PATH}/arm-none-eabi-objcopy.exe")
-set(CMAKE_SIZE                      "${ARM_GCC_PATH}/arm-none-eabi-size.exe")
+set(ARM_GCC_PATH "" CACHE PATH "ARM GCC bin dir (empty = use PATH)")
+set(CMAKE_C_COMPILER                arm-none-eabi-gcc)
+set(CMAKE_ASM_COMPILER              arm-none-eabi-gcc)
+set(CMAKE_OBJCOPY                   arm-none-eabi-objcopy)
+set(CMAKE_SIZE                      arm-none-eabi-size)
 
 set(MCU_FLAGS
     -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard
@@ -20,7 +20,7 @@ project(STM32H7_RadarMaster C ASM)
 
 include_directories(
     .  Core  Drivers  Radar  Algorithm  TargetManager
-    Communication  ClosedLoop  Network  DataLogger
+    Communication  ClosedLoop  Network  Datalogger
     Src  Inc
     Drivers/STM32H7xx_HAL_Driver/Inc
     Drivers/CMSIS/Device/ST/STM32H7xx/Include
@@ -30,7 +30,7 @@ include_directories(
 # 应用源文件
 file(GLOB_RECURSE SRC
     Core/*.c  Radar/*.c  Algorithm/*.c  TargetManager/*.c
-    Communication/*.c  ClosedLoop/*.c  DataLogger/*.c  Drivers/*.S
+    Communication/*.c  ClosedLoop/*.c  Datalogger/*.c  Drivers/*.S Drivers/*.s
 )
 
 # 入口切换：使用 CubeMX 生成的 Src/main.c 作为入口（Core/main.c 已移除）

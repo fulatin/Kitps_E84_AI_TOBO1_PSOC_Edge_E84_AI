@@ -18,6 +18,7 @@
 extern "C" {
 #endif
 
+void UART_StartRxIT(void);
 void UART_Send84E(uint8_t *data, uint16_t len);
 void UART_SendESP32(uint8_t esp_id, uint8_t *data, uint16_t len);
 
