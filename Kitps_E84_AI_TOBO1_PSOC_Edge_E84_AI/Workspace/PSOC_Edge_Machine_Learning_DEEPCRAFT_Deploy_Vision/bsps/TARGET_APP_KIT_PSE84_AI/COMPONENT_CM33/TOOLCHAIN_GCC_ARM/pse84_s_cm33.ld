@@ -106,14 +106,14 @@ SECTIONS
     } > m33s_nvm_sel_S
 
     /* This section is dedicated to the vector table */
-    .vector_table() : ALIGN(VECTORS_ALIGNMENT)
+    .vector_table(READONLY) : ALIGN(VECTORS_ALIGNMENT)
     {
         /* Keep the vector table */
         KEEP(*(.vectors))
     } > m33s_nvm_sel_S
 
     /* A section for the veneer code of Secure APIs */
-    .gnu.sgstubs : ALIGN(32)
+    .gnu.sgstubs(READONLY) : ALIGN(32)
     {
         . = ALIGN(32);
         __nsc_start = .;
@@ -123,9 +123,9 @@ SECTIONS
 
     /* Empty section to generate the end address of the NSC section correctly
        see https://answers.launchpad.net/gcc-arm-embedded/+question/697333  */
-    empty_section : ALIGN(32)
+    empty_section(READONLY) : ALIGN(32)
     {
-	__nsc_end = .;
+    	__nsc_end = .;
     } > m33s_nvm_sel_S
 
     PROVIDE(__nsc_region_start = __nsc_start);
@@ -133,7 +133,7 @@ SECTIONS
 
     /* This section is intended to hold the main secure (S) application code for the Cortex-M33 */
     /* Performance-sensitive or critical functions that need to be executed in sram are manually excluded */
-    .app_code_main : ALIGN(VECTORS_ALIGNMENT)
+    .app_code_main(READONLY) : ALIGN(VECTORS_ALIGNMENT)
     {
         /* Keep initializers */
         KEEP(*(.init))

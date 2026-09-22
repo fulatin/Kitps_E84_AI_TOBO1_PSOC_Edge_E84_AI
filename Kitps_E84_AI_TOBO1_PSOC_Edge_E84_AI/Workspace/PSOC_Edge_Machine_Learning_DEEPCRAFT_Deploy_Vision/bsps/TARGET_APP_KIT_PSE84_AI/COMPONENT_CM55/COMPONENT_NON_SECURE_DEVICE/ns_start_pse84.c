@@ -24,7 +24,7 @@
  */
 
 /*
- * CMSIS Device Startup file modified to adapt for PSOC Edge Device.
+ * CMSIS Device Startup file modified to adapt for PSOC Edge Device. 
  */
 
 #include <stdio.h>

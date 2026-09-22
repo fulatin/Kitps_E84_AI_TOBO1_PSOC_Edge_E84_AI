@@ -7,6 +7,7 @@
 #include "tracking/closed_loop.h"
 #include "tracking/relock.h"
 #include "data_logger/logger.h"
+#include <stdlib.h>
 #include <string.h>
 
 #define LOST_THRESHOLD      5   /* 连续 N 帧丢失判定丢失 */

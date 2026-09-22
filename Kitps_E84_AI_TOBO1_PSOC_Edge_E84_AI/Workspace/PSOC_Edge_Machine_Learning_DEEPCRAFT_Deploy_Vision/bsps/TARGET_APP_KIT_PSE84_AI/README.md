@@ -2,7 +2,7 @@
 
 ## Overview
 
-The PSOC™ Edge E84 AI Kit (KIT\_PSE84\_AI) is based on the PSOC™ Edge family of devices. It enables the evaluation and development of applications for the PSOC™ Edge E84 EPC2 MCU.
+The PSOC™ Edge E84 AI Kit (KIT_PSE84_AI) is based on the PSOC™ Edge family of devices. It enables the evaluation and development of applications for the PSOC™ Edge E84 EPC2 MCU.
 
 
 ![](docs/html/board.png)
@@ -10,8 +10,8 @@ The PSOC™ Edge E84 AI Kit (KIT\_PSE84\_AI) is based on the PSOC™ Edge family
 To use code from the BSP, simply include a reference to `cybsp.h`.
 
 ## Features
-This evaluation kit carries a PSOC™ E84 MCU (PSE846GPS2DBZC4A). The kit also has 512\-Mbit QSPI flash, 128\-Mbit Octal RAM and on\-board LBEE5HY2FY module with Wi\-Fi/Bluetooth® connectivity.
-The board features an on\-board programmer/debugger (KitProg3\), expansion IO header, R\-Pi compatible MIPI\-DSI, analog and digital microphones, USB device Type\-C connector, 6\-axis IMU sensor, 3\-axis magnetometer, barometric pressure sensor, humidity sensor, radar, user LEDs, and a user button. The MCU power domain and peripheral power domain supports following operating voltages \- 1\.8 V, 3\.3 V.
+This evaluation kit carries a PSOC™ E84 MCU (PSE846GPS2DBZC4A). The kit also has 512-Mbit QSPI flash, 128-Mbit Octal RAM and on-board LBEE5HY2FY module with Wi-Fi/Bluetooth® connectivity.  
+The board features an on-board programmer/debugger (KitProg3), expansion IO header, R-Pi compatible MIPI-DSI, analog and digital microphones, USB device Type-C connector, 6-axis IMU sensor, 3-axis magnetometer, barometric pressure sensor, humidity sensor, radar, user LEDs, and a user button. The MCU power domain and peripheral power domain supports following operating voltages - 1.8 V, 3.3 V.
 
 
 ## BSP Configuration
@@ -53,7 +53,7 @@ Defines:
 See the [BSP Setttings][settings] for additional board specific configuration settings.
 
 ## Default linker scripts
-The default linker scripts define a lot of different regions so this document is intended to explain their
+The default linker scripts define a lot of different regions so this document is intended to explain their 
 purposes. The analysis will be done per memory area.
 
 ### ITCM
@@ -102,7 +102,7 @@ These files are:
 * `cymem_gnu_CM33_S_0.ld`, `cymem_gnu_CM33_0.ld`, `cymem_gnu_CM55_0.ld`: these three files contain all the defines for the regions in the memory configurator but have the ld extension to be easily picked up and integrated in the linker scripts for the GCC_ARM and LLVM_ARM toolchain
 * `cymem_gnu_regions_CM33_S_0.ld`, `cymem_gnu_regions_CM33_0.ld`, `cymem_gnu_regions_CM55_0.ld`: these three files contain all the MEMORY regions information as needed by the GCC_ARM and LLVM_ARM linkers to partition the memory correctly.
 * `cymem_ilinkarm_CM33_S_0.ld`, `cymem_ilinkarm_CM33_0.ld`, `cymem_ilinkarm_CM55_0.ld`: these three files contain all the defines for the regions in the memory onfigurator but have the icf extension to be easily picked up and integrated in the linker scripts for the IAR toolchain.
-* `cymem_ilinkarm_regions_CM33_S_0.ld`, `cymem_ilinkarm_regions_CM33_0.ld`, `cymem_ilinkarm_regions_CM55_0.ld` : these three files contain all the memory regions
+* `cymem_ilinkarm_regions_CM33_S_0.ld`, `cymem_ilinkarm_regions_CM33_0.ld`, `cymem_ilinkarm_regions_CM55_0.ld` : these three files contain all the memory regions 
 information as needed by the IAR linkers to partition the memory correctly.
 
 ## Note on memory aliases

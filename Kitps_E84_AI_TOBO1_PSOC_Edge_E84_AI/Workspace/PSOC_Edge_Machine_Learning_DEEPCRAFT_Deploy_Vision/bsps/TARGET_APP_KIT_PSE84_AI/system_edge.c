@@ -288,7 +288,7 @@ uint32_t Cy_SysCM55GetStatus(MXCM55_Type *CM55Base)
 ****************************************************************************//**
 *
 * Enables SOCMEM IP
-*
+* 
 * \param enable
 * Enable or disable SOCMEM
 *

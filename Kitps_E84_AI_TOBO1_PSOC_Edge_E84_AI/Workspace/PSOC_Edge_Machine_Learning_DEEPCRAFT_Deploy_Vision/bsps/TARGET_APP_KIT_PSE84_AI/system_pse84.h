@@ -250,7 +250,7 @@ extern void SystemCoreClockUpdate(void);
 extern void SystemCoreClockSetup (uint32_t systemCoreClk_freq_hz, uint32_t ahb_freq_hz);
 
 /** Performs custom system initialization.
-  *
+  * 
   * The function is called during device startup. This is a weak function that
   * by default does nothing. It can be overridden to add custom steps to SystemInit
   */

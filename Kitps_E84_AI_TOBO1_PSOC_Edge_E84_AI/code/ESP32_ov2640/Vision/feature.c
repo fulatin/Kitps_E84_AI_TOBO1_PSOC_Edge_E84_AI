@@ -5,6 +5,7 @@
 
 #include "feature.h"
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* ──── Sobel 3x3 梯度 ──── */

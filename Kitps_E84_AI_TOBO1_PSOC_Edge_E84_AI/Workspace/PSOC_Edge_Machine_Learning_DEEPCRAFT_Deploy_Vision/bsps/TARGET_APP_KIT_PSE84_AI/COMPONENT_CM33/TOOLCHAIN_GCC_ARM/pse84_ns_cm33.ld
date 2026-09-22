@@ -105,7 +105,7 @@ SECTIONS
 
     /* This section is intended to hold the main non-secure (NS) application code for the Cortex-M33 */
     /* Performance-sensitive or critical functions that need to be executed in sram are manually excluded */
-    .app_code_main : ALIGN(VECTORS_ALIGNMENT)
+    .app_code_main(READONLY) : ALIGN(VECTORS_ALIGNMENT)
     {
         /* Keep the vector table */
         KEEP(*(.vectors))

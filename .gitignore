@@ -18,6 +18,10 @@
 *.ninja_deps
 *.check_cache
 build/
+# CMake 配置缓存（生成物，不入库）
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
 Build/
 Debug/
 Release/
@@ -38,14 +42,14 @@ mtb-hal-cat1/
 mtb-pdl-cat2/
 mtb-hal-cat2/
 mtbx/
-*.mtb
-*.mtbx
+# 注意：不要忽略 *.mtb / *.mtbx！它们是 ModusToolbox 的依赖声明清单
+# （proj_*/deps/*.mtb），必须随仓库提交，否则 make getlibs 无依赖可拉取。
 
 # === IDE 临时文件 ===
 *.cydata
 *.cymigration
 *.cypersonality
-*.cyignore
+# 注意：不要忽略 .cyignore —— BSP 的 .cyignore 是构建设置的一部分。
 *.modus
 *.mtbqueryapi
 *.generated-files
